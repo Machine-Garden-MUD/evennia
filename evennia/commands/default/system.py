@@ -24,6 +24,11 @@ from evennia.utils.evmenu import ask_yes_no
 from evennia.utils.evtable import EvTable
 from evennia.utils.utils import class_from_module, iter_to_str
 
+_SERVER_RESTART_MESSAGE = settings.SERVER_RESTART_MESSAGE
+_SERVER_RESET_MESSAGE = settings.SERVER_RESET_MESSAGE
+_SERVER_RESTARTED_MESSAGE = settings.SERVER_RESTARTED_MESSAGE
+_SERVER_SHUTDOWN_MESSAGE = settings.SERVER_SHUTDOWN_MESSAGE
+_SERVER_SHUTDOWN_FINAL_MESSAGE = settings.SERVER_SHUTDOWN_FINAL_MESSAGE
 COMMAND_DEFAULT_CLASS = class_from_module(settings.COMMAND_DEFAULT_CLASS)
 _TASK_HANDLER = None
 _BROADCAST_SERVER_RESTART_MESSAGES = settings.BROADCAST_SERVER_RESTART_MESSAGES
@@ -73,7 +78,7 @@ class CmdReload(COMMAND_DEFAULT_CLASS):
         if self.args:
             reason = "(Reason: %s) " % self.args.rstrip(".")
         if _BROADCAST_SERVER_RESTART_MESSAGES:
-            SESSIONS.announce_all(" Server restart initiated %s..." % reason)
+            SESSIONS.announce_all(f"{_SERVER_RESTART_MESSAGE} %s" % reason)
         SESSIONS.portal_restart_server()
 
 
@@ -107,7 +112,7 @@ class CmdReset(COMMAND_DEFAULT_CLASS):
         """
         Reload the system.
         """
-        SESSIONS.announce_all(" Server resetting/restarting ...")
+        SESSIONS.announce_all(_SERVER_RESET_MESSAGE)
         SESSIONS.portal_reset_server()
 
 
@@ -131,8 +136,8 @@ class CmdShutdown(COMMAND_DEFAULT_CLASS):
         # Only allow shutdown if caller has session
         if not self.caller.sessions.get():
             return
-        self.msg("Shutting down server ...")
-        announcement = "\nServer is being SHUT DOWN!\n"
+        self.msg(_SERVER_SHUTDOWN_MESSAGE)
+        announcement = "\n%s\n" % _SERVER_SHUTDOWN_FINAL_MESSAGE
         if self.args:
             announcement += "%s\n" % self.args
         logger.log_info("Server shutdown by %s." % self.caller.name)
