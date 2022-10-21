@@ -107,7 +107,6 @@ jobs:
         pip install psycopg2-binary==2.8.6   # fix issue for Django 2.2
         pip install mysqlclient
         pip install coveralls
-        pip install codacy-coverage
         pip install tblib
         pip install -e .
 
@@ -131,11 +130,11 @@ jobs:
           --omit=*/migrations/*,*/urls.py,*/test*.py,*.sh,*.txt,*.md,*.pyc,*.service \
           ../bin/unix/evennia test \
             --settings=settings \
-            --keepdb \
             --parallel 4 \
             --timing \
             evennia
         coverage xml
+        coverage report | grep TOTAL
 
     - name: Run test suite
       if: matrix.TESTING_DB != 'sqlite3' || matrix.python-version != '3.10'
@@ -148,7 +147,7 @@ jobs:
           --timing \
           evennia
 
-    # we only want to run coverall/codacy once, so we only do it for one of the matrix combinations
+    # we only want to run coverall once, so we only do it for one of the matrix combinations
     # it's also not critical if pushing to either service fails (happens for PRs since env is not
     # available outside of the evennia org)
     - name: Send data to Coveralls
@@ -159,14 +158,6 @@ jobs:
       run: |
         cd testing_mygame
         coveralls
-
-    - name: Send data to Codacy
-      if: ${{ matrix.TESTING_DB == 'sqlite3' && matrix.python-version == '3.10' }}
-      continue-on-error: true
-      uses: codacy/codacy-coverage-reporter-action@master
-      with:
-        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        coverage-reports: ./testing_mygame/coverage.xml
 
     # docker setup and push
     -
