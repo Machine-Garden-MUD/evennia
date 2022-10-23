@@ -121,6 +121,8 @@ jobs:
         evennia migrate
         evennia collectstatic --noinput
 
+    # OBS - it's important to not run the coverage tests with --parallel, it messes up the coverage
+    # calculation! 
     - name: Run test suite with coverage
       if: matrix.TESTING_DB == 'sqlite3' && matrix.python-version == '3.10'
       working-directory: testing_mygame
@@ -130,12 +132,13 @@ jobs:
           --omit=*/migrations/*,*/urls.py,*/test*.py,*.sh,*.txt,*.md,*.pyc,*.service \
           ../bin/unix/evennia test \
             --settings=settings \
-            --parallel 4 \
             --timing \
             evennia
         coverage xml
+        coverage --version
         coverage report | grep TOTAL
 
+    # For other runs, run tests in parallel
     - name: Run test suite
       if: matrix.TESTING_DB != 'sqlite3' || matrix.python-version != '3.10'
       working-directory: testing_mygame
@@ -163,15 +166,15 @@ jobs:
     -
       name: Set up QEMU
       if: matrix.TESTING_DB == 'sqlite3' && matrix.python-version == '3.10'
-      uses: docker/setup-qemu-action@v1
+      uses: docker/setup-qemu-action@v2
     -
       name: Set up Docker Buildx
       if: matrix.TESTING_DB == 'sqlite3' && matrix.python-version == '3.10'
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v2
     -
       name: Login to DockerHub
       if: matrix.TESTING_DB == 'sqlite3' && matrix.python-version == '3.10' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
-      uses: docker/login-action@v1
+      uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -179,7 +182,7 @@ jobs:
       name: Build and push for master
       if: matrix.TESTING_DB == 'sqlite3' && matrix.python-version == '3.9' && github.ref == 'refs/heads/master'
       id: docker_build_master
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v3
       with:
         push: true
         tags: evennia/evennia:latest
@@ -187,7 +190,7 @@ jobs:
       name: Build and push for develop
       if: matrix.TESTING_DB == 'sqlite3' && matrix.python-version == '3.10' && github.ref == 'refs/heads/develop'
       id: docker_build_develop
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v3
       with:
         push: true
         tags: evennia/evennia:develop
