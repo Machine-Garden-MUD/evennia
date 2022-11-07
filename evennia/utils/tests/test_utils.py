@@ -7,16 +7,15 @@ TODO: Not nearly all utilities are covered yet.
 
 import os.path
 import random
-from parameterized import parameterized
-import mock
 from datetime import datetime, timedelta
 
+import mock
 from django.test import TestCase
-from twisted.internet import task
-
-from evennia.utils.ansi import ANSIString
 from evennia.utils import utils
+from evennia.utils.ansi import ANSIString
 from evennia.utils.test_resources import BaseEvenniaTest
+from parameterized import parameterized
+from twisted.internet import task
 
 
 class TestIsIter(TestCase):
@@ -66,8 +65,12 @@ class TestListToString(TestCase):
         [1,2,3] -> '1, 2, 3'
      with sep==';' and endsep==';':
         [1,2,3] -> '1; 2; 3'
+     with sep=='or':
+        [1,2,3] -> '1 or 2, and 3'
      with endsep=='and':
         [1,2,3] -> '1, 2 and 3'
+     with endsep=='; and':
+        [1,2,3] -> '1, 2; and 3'
      with endsep=='':
         [1,2,3] -> '1, 2 3'
      with addquote and endsep="and"
@@ -80,6 +83,8 @@ class TestListToString(TestCase):
         self.assertEqual("1, 2 and 3", utils.list_to_string([1, 2, 3], endsep="and"))
         self.assertEqual("1, 2 3", utils.list_to_string([1, 2, 3], endsep=""))
         self.assertEqual("1; 2; 3", utils.list_to_string([1, 2, 3], sep=";", endsep=";"))
+        self.assertEqual("1 or 2, and 3", utils.list_to_string([1, 2, 3], sep="or"))
+        self.assertEqual("1, 2; and 3", utils.list_to_string([1, 2, 3], endsep="; and"))
         self.assertEqual(
             '"1", "2", "3"', utils.list_to_string([1, 2, 3], endsep=",", addquote=True)
         )
@@ -715,10 +720,10 @@ class TestIntConversions(TestCase):
         # basic mapped numbers
         self.assertEqual(3, utils.str2int("three"))
         self.assertEqual(20, utils.str2int("twenty"))
-        
+
         # multi-place numbers
         self.assertEqual(2345, utils.str2int("two thousand, three hundred and forty-five"))
-        
+
         # ordinal numbers
         self.assertEqual(1, utils.str2int("1st"))
         self.assertEqual(1, utils.str2int("first"))
@@ -729,3 +734,27 @@ class TestIntConversions(TestCase):
 
         with self.assertRaises(ValueError):
             utils.str2int("not a number")
+
+
+class TestJustify(TestCase):
+    def test_justify_whitespace(self):
+        result = utils.justify(" ", 1, align="l")
+        self.assertEqual(" ", result)
+
+        result = utils.justify("", 1, align="l")
+        self.assertEqual(" ", result)
+
+    @parameterized.expand(
+        [
+            (5, "Task \n ID  "),
+            (6, " Task \n  ID  "),
+            (7, "Task ID"),
+            (8, "Task ID "),
+            (9, " Task ID "),
+            (10, " Task ID  "),
+            (11, "  Task ID  "),
+        ]
+    )
+    def test_center_justify_small(self, width, expected):
+        result = utils.justify("Task ID", width, align="c", indent=0, fillchar=" ")
+        self.assertEqual(expected, result)
