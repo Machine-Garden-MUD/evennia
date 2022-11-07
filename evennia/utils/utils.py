@@ -24,8 +24,8 @@ from ast import literal_eval
 from collections import OrderedDict, defaultdict
 from inspect import getmembers, getmodule, getmro, ismodule, trace
 from os.path import join as osjoin
-from unicodedata import east_asian_width
 from string import punctuation
+from unicodedata import east_asian_width
 
 from django.apps import apps
 from django.conf import settings
@@ -214,7 +214,7 @@ def dedent(text, baseline_index=None, indent=None):
         )
 
 
-def justify(text, width=None, align="f", indent=0):
+def justify(text, width=None, align="l", indent=0, fillchar=" "):
     """
     Fully justify a text so that it fits inside `width`. When using
     full justification (default) this will be done by padding between
@@ -224,50 +224,68 @@ def justify(text, width=None, align="f", indent=0):
     Args:
         text (str): Text to justify.
         width (int, optional): The length of each line, in characters.
-        align (str, optional): The alignment, 'l', 'c', 'r' or 'f'
-            for left, center, right or full justification respectively.
+        align (str, optional): The alignment, 'l', 'c', 'r', 'f' or 'a'
+            for left, center, right, full justification. The 'a' stands for
+            'absolute' and means the text will be returned unmodified.
         indent (int, optional): Number of characters indentation of
             entire justified text block.
+        fillchar (str): The character to use to fill. Defaults to empty space.
 
     Returns:
         justified (str): The justified and indented block of text.
 
     """
-    width = width if width else settings.CLIENT_DEFAULT_WIDTH
 
     def _process_line(line):
         """
         helper function that distributes extra spaces between words. The number
         of gaps is nwords - 1 but must be at least 1 for single-word lines. We
-        distribute odd spaces randomly to one of the gaps.
+        distribute odd spaces to one of the gaps.
         """
         line_rest = width - (wlen + ngaps)
         gap = " "  # minimum gap between words
         if line_rest > 0:
             if align == "l":
                 if line[-1] == "\n\n":
-                    line[-1] = " " * (line_rest - 1) + "\n" + " " * width + "\n" + " " * width
+                    line[-1] = sp * (line_rest - 1) + "\n" + sp * width + "\n" + sp * width
                 else:
-                    line[-1] += " " * line_rest
+                    line[-1] += sp * line_rest
             elif align == "r":
-                line[0] = " " * line_rest + line[0]
+                line[0] = sp * line_rest + line[0]
             elif align == "c":
-                pad = " " * (line_rest // 2)
+                pad = sp * (line_rest // 2)
                 line[0] = pad + line[0]
                 if line[-1] == "\n\n":
                     line[-1] += (
-                        pad + " " * (line_rest % 2 - 1) + "\n" + " " * width + "\n" + " " * width
+                        pad + sp * (line_rest % 2 - 1) + "\n" + sp * width + "\n" + sp * width
                     )
                 else:
-                    line[-1] = line[-1] + pad + " " * (line_rest % 2)
+                    line[-1] = line[-1] + pad + sp * (line_rest % 2)
             else:  # align 'f'
-                gap += " " * (line_rest // max(1, ngaps))
+                gap += sp * (line_rest // max(1, ngaps))
                 rest_gap = line_rest % max(1, ngaps)
                 for i in range(rest_gap):
-                    line[i] += " "
+                    line[i] += sp
         elif not any(line):
-            return [" " * width]
+            return [sp * width]
         return gap.join(line)
+
+    width = width if width is not None else settings.CLIENT_DEFAULT_WIDTH
+    sp = fillchar
+
+    if align == "a":
+        # absolute mode - just crop or fill to width
+        abs_lines = []
+        for line in text.split("\n"):
+            nlen = len(line)
+            if len(line) < width:
+                line += sp * (width - nlen)
+            else:
+                line = crop(line, width=width, suffix="")
+            abs_lines.append(line)
+        return "\n".join(abs_lines)
+
+    # all other aligns requires splitting into paragraphs and words
 
     # split into paragraphs and words
     paragraphs = re.split("\n\s*?\n", text, re.MULTILINE)
@@ -278,7 +296,12 @@ def justify(text, width=None, align="f", indent=0):
         words.extend((word, len(word)) for word in paragraph.split())
     ngaps, wlen, line = 0, 0, []
 
+    if not words:
+        # Just whitespace!
+        return sp * width
+
     lines = []
+
     while words:
         if not line:
             # start a new line
@@ -303,7 +326,8 @@ def justify(text, width=None, align="f", indent=0):
 
     if line:  # catch any line left behind
         lines.append(_process_line(line))
-    indentstring = " " * indent
+    indentstring = sp * indent
+    out = "\n".join([indentstring + line for line in lines])
     return "\n".join([indentstring + line for line in lines])
 
 
@@ -404,7 +428,7 @@ def iter_to_str(iterable, sep=",", endsep=", and", addquote=False):
     if not iterable:
         return ""
     len_iter = len(iterable)
-    
+
     if addquote:
         iterable = tuple(f'"{val}"' for val in iterable)
     else:
@@ -420,7 +444,7 @@ def iter_to_str(iterable, sep=",", endsep=", and", addquote=False):
 
     # also add a leading space if separator is a word
     if sep not in punctuation:
-        sep = " "+sep
+        sep = " " + sep
 
     if len_iter == 1:
         return str(iterable[0])
@@ -2169,23 +2193,34 @@ def calledby(callerdepth=1):
     another function; it will print which function called it.
 
     Args:
-        callerdepth (int): Must be larger than 0. When > 1, it will
-            print the caller of the caller etc.
+        callerdepth (int or None): If None, show entire stack. If int, must be larger than 0.
+            When > 1, it will print the sequence to that depth.
 
     Returns:
-        calledby (str): A debug string detailing which routine called
-            us.
+        calledby (str): A debug string detailing the code that called us.
 
     """
     import inspect
 
+    def _stack_display(frame):
+        path = os.path.sep.join(frame[1].rsplit(os.path.sep, 2)[-2:])
+        return (
+            f"> called by '{frame[3]}': {path}:{frame[2]} >>>"
+            f" {frame[4][0].strip() if frame[4] else ''}"
+        )
+
     stack = inspect.stack()
-    # we must step one extra level back in stack since we don't want
-    # to include the call of this function itself.
-    callerdepth = min(max(2, callerdepth + 1), len(stack) - 1)
-    frame = inspect.stack()[callerdepth]
-    path = os.path.sep.join(frame[1].rsplit(os.path.sep, 2)[-2:])
-    return "[called by '%s': %s:%s %s]" % (frame[3], path, frame[2], frame[4])
+
+    out = []
+    if callerdepth is None:
+        callerdepth = len(stack) - 1
+
+    # show range
+    for idepth in range(1, max(1, callerdepth + 1)):
+        # we must step one extra level back in stack since we don't want
+        # to include the call of this function itself.
+        out.append(_stack_display(stack[min(idepth + 1, len(stack) - 1)]))
+    return "\n".join(out[::-1])
 
 
 def m_len(target):
@@ -2287,14 +2322,21 @@ def at_search_result(matches, caller, query="", quiet=False, **kwargs):
             )
 
         for num, result in enumerate(matches):
-            # we need to consider Commands, where .aliases is a list
-            aliases = result.aliases.all() if hasattr(result.aliases, "all") else result.aliases
-            # remove any pluralization aliases
-            aliases = [
-                alias
-                for alias in aliases
-                if hasattr(alias, "category") and alias.category not in ("plural_key",)
-            ]
+            # we need to consider that result could be a Command, where .aliases
+            # is a list of strings
+            if hasattr(result.aliases, "all"):
+                # result is a typeclassed entity where `.aliases` is an AliasHandler.
+                aliases = result.aliases.all(return_objs=True)
+                # remove pluralization aliases
+                aliases = [
+                    alias
+                    for alias in aliases
+                    if hasattr(alias, "category") and alias.category not in ("plural_key",)
+                ]
+            else:
+                # result is likely a Command, where `.aliases` is a list of strings.
+                aliases = result.aliases
+
             error += _MULTIMATCH_TEMPLATE.format(
                 number=num + 1,
                 name=result.get_display_name(caller)

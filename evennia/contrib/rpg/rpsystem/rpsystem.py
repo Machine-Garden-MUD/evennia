@@ -150,11 +150,12 @@ Extra Installation Instructions:
 """
 import re
 from string import punctuation
+
 from django.conf import settings
-from evennia.objects.objects import DefaultObject, DefaultCharacter
-from evennia.objects.models import ObjectDB
-from evennia.commands.command import Command
 from evennia.commands.cmdset import CmdSet
+from evennia.commands.command import Command
+from evennia.objects.models import ObjectDB
+from evennia.objects.objects import DefaultCharacter, DefaultObject
 from evennia.utils import ansi, logger
 from evennia.utils.utils import lazy_property, make_iter, variable_from_module
 
@@ -319,7 +320,9 @@ def parse_language(speaker, emote):
     return emote, mapping
 
 
-def parse_sdescs_and_recogs(sender, candidates, string, search_mode=False, case_sensitive=True):
+def parse_sdescs_and_recogs(
+    sender, candidates, string, search_mode=False, case_sensitive=True, fallback=None
+):
     """
     Read a raw emote and parse it into an intermediary
     format for distributing to all observers.
@@ -332,11 +335,14 @@ def parse_sdescs_and_recogs(sender, candidates, string, search_mode=False, case_
     string (str): The string (like an emote) we want to analyze for keywords.
     search_mode (bool, optional): If `True`, the "emote" is a query string
         we want to analyze. If so, the return value is changed.
-    case_sensitive (bool, optional); If set, the case of /refs matter, so that
+    case_sensitive (bool, optional): If set, the case of /refs matter, so that
         /tall will come out as 'tall man' while /Tall will become 'Tall man'.
         This allows for more grammatically correct emotes at the cost of being
         a little more to learn for players. If disabled, the original sdesc case
         is always kept and are inserted as-is.
+    fallback (string, optional): If set, any references that don't match a target
+        will be replaced with the fallback string. If `None` (default), the
+        parsing will fail and give a warning about the missing reference.
 
     Returns:
         (emote, mapping) (tuple): If `search_mode` is `False`
@@ -485,7 +491,11 @@ def parse_sdescs_and_recogs(sender, candidates, string, search_mode=False, case_
             # single-object search mode. Don't continue loop.
             break
         elif nmatches == 0:
-            errors.append(_EMOTE_NOMATCH_ERROR.format(ref=marker_match.group()))
+            if fallback:
+                # replace unmatched reference with the fallback string
+                string = f"{head}{fallback}{tail}"
+            else:
+                errors.append(_EMOTE_NOMATCH_ERROR.format(ref=marker_match.group()))
         elif nmatches == 1:
             # a unique match - parse into intermediary representation
             case = _get_case_ref(marker_match.group()) if case_sensitive else ""
@@ -560,9 +570,10 @@ def send_emote(sender, receivers, emote, msg_type="pose", anonymous_add="first",
 
     """
     case_sensitive = kwargs.pop("case_sensitive", True)
+    fallback = kwargs.pop("fallback", None)
     try:
         emote, obj_mapping = parse_sdescs_and_recogs(
-            sender, receivers, emote, case_sensitive=case_sensitive
+            sender, receivers, emote, case_sensitive=case_sensitive, fallback=fallback
         )
         emote, language_mapping = parse_language(sender, emote)
     except (EmoteError, LanguageError) as err:
@@ -1124,7 +1135,7 @@ class CmdRecog(RPCommand):  # assign personal alias to object in room
             all_recogs = caller.recog.all()
             if not all_recogs:
                 caller.msg(
-                    "You recognize no-one. " "(Use 'recog <sdesc> as <alias>' to recognize people."
+                    "You recognize no-one. (Use 'recog <sdesc> as <alias>' to recognize people."
                 )
             else:
                 # note that we don't skip those failing enable_recog lock here,
@@ -1134,7 +1145,7 @@ class CmdRecog(RPCommand):  # assign personal alias to object in room
                     for key, obj in all_recogs.items()
                 )
                 caller.msg(
-                    f"Currently recognized (use 'recog <sdesc> as <alias>' to add "
+                    "Currently recognized (use 'recog <sdesc> as <alias>' to add "
                     f"new and 'forget <alias>' to remove):\n{lst}"
                 )
             return
