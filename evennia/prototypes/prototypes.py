@@ -12,6 +12,7 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.utils.translation import gettext as _
+
 from evennia.locks.lockhandler import check_lockstring, validate_lockstring
 from evennia.objects.models import ObjectDB
 from evennia.scripts.scripts import DefaultScript
@@ -525,8 +526,6 @@ def search_prototype(
     require_single=False,
     return_iterators=False,
     no_db=False,
-    page_size=None,
-    page_no=None,
 ):
     """
     Find prototypes based on key and/or tags, or all prototypes.

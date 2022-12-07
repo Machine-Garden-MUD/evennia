@@ -104,6 +104,12 @@ img {
     max-width: 100%;
 }
 
+/* images in the body */ 
+p > img {
+    float: right;
+    padding:0.5em 1em 0.5em 1em;
+}
+
 /* -- search page ----------------------------------------------------------- */
 
 ul.search {
@@ -703,9 +709,8 @@ div.highlight > pre {
 
 /* default ({code-block}, no arg) - used for in-game code */
 div.highlight-shell.notranslate > div.highlight > pre {
-  background-color: #faf2e6;
-  font-weight: bold;
-  font-style: italic;
+  background-color: #505050;
+  color: white;
 } 
 
 div.doctest > div.highlight span.gp {  /* gp: Generic.Prompt */

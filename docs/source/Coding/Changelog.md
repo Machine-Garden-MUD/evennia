@@ -2,10 +2,12 @@
 
 ### Evennia 1.0
 
-> Not released yet
-> 2019-2022 develop branch (WIP)
+2019-2022 develop branch
 
-Up requirements to Django 4.0+, Twisted 22+, Python 3.9 or 3.10
+Changed to using `main` branch to follow github standard. Old `master` branch remains
+for now but will not be used anymore, so as to not break installs during transition.
+
+Increase requirements: Django 4.1+, Twisted 22.10+ Python 3.10, 3.11.  PostgreSQL 11+.
 
 - New `drop:holds()` lock default to limit dropping nonsensical things. Access check
   defaults to True for backwards-compatibility in 0.9, will be False in 1.0
@@ -205,6 +207,24 @@ Up requirements to Django 4.0+, Twisted 22+, Python 3.9 or 3.10
 - Make setting `MAX_NR_CHARACTERS` interact better with the new settings above.
 - Allow `$search` funcparser func to search tags and to accept kwargs for more
   powerful searches passed into the regular search functions.
+- `spawner.spawn` and linked methods now has a kwarg `protfunc_raise_errors`
+  (default True) to disable strict errors on malformed/not-found protfuncs
+- Improve search performance when having many DB-based prototypes via caching.
+- Remove the `return_parents` kwarg of `evennia.prototypes.spawner.spawn` since it
+  was inefficient and unused.
+- Made all id fields BigAutoField for all databases. (owllex)
+- `EvForm` refactored. New `literals` mapping, for literal mappings into the
+  main template (e.g. for single-character replacements).
+- `EvForm` `cells` kwarg now accepts `EvCells` with custom formatting options
+  (mainly for custom align/valign). `EvCells` now makes use of `utils.justify`.
+- `utils.justify` now supports `align="a"` (absolute alignments. This keeps
+  the given left indent but crops/fills to the width. Used in EvCells.
+- `EvTable` now supports passing `EvColumn`s as a list directly, (`EvTable(table=[colA,colB])`)
+- Add `tags=` search criterion to `DefaultObject.search`.
+- Add `AT_EXIT_TRAVERSE` signal, firing when an exit is traversed.
+- Add integration between Evennia and Discord channels (PR by Inspector Cararacal)
+- Support for using a Godot-powered client with Evennia (PR by ChrisLR)
+- Added German translation (patch by Zhuraj)
 
 ## Evennia 0.9.5
 

@@ -18,9 +18,10 @@ from django.db.models.base import Model, ModelBase
 from django.db.models.signals import post_migrate, post_save, pre_delete
 from django.db.transaction import atomic
 from django.db.utils import DatabaseError
+from twisted.internet.reactor import callFromThread
+
 from evennia.utils import logger
 from evennia.utils.utils import dbref, get_evennia_pids, to_str
-from twisted.internet.reactor import callFromThread
 
 from .manager import SharedMemoryManager
 
@@ -433,7 +434,9 @@ class SharedMemoryModel(Model, metaclass=SharedMemoryModelBase):
         """
         global _MONITOR_HANDLER
         if not _MONITOR_HANDLER:
-            from evennia.scripts.monitorhandler import MONITOR_HANDLER as _MONITOR_HANDLER
+            from evennia.scripts.monitorhandler import (
+                MONITOR_HANDLER as _MONITOR_HANDLER,
+            )
 
         if _IS_SUBPROCESS:
             # we keep a store of objects modified in subprocesses so

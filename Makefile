@@ -1,7 +1,6 @@
 # This is used with `make <option>` and is used for running various
 # administration operations on the code.
 
-BLACK_FORMAT_CONFIGS = --target-version py37 --line-length 100 --exclude=/docs
 TEST_GAME_DIR = .test_game_dir
 TESTS ?= evennia
 
@@ -14,16 +13,19 @@ default:
 	@echo "  make test - run evennia test suite with all default values."
 	@echo "  make tests=evennia.path test - run only specific test or tests."
 	@echo "  make testp - run test suite using multiple cores."
+	@echo "  make publish - publish evennia to pypi (requires pypi credentials)
 
 install:
 	pip install -e .
 
 installextra:
 	pip install -e .
-	pip install -r requirements_extra.txt
+	pip install -e .[extra]
 
+# black is configured from pyproject.toml
 format:
-	black $(BLACK_FORMAT_CONFIGS) evennia
+	black evennia
+	isort --profile black .
 
 fmt: format
 
@@ -41,3 +43,11 @@ testp:
 	cd $(TEST_GAME_DIR);\
 	evennia migrate;\
 	evennia test --keepdb --parallel 4 $(TESTS);\
+
+release:
+	rm -Rf dist/
+	git clean -xdf	
+	pip install --upgrade pip 
+	pip install build twine 
+	python -m build --sdist --wheel --outdir dist/ . 
+	python -m twine upload dist/*

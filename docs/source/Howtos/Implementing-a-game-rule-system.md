@@ -46,15 +46,8 @@ values for Health, a list of skills etc, store those things on the Character - d
 roll or change them.
 - Next is to determine just how you want to store things on your Objects and Characters. You can
 choose to either store things as individual [Attributes](../Components/Attributes.md), like `character.db.STR=34` and
-`character.db.Hunting_skill=20`. But you could also use some custom storage method, like a
-dictionary `character.db.skills = {"Hunting":34, "Fishing":20, ...}`. A much more fancy solution is
-to look at the Ainneve [Trait
-handler](https://github.com/evennia/ainneve/blob/master/world/traits.py). Finally you could even go
-with a [custom django model](../Concepts/New-Models.md). Which is the better depends on your game and the
-complexity of your system.
-- Make a clear [API](https://en.wikipedia.org/wiki/Application_programming_interface) into your
-rules. That is, make methods/functions that you feed with, say, your Character and which skill you
-want to check. That is, you want something similar to this:
+`character.db.Hunting_skill=20`. But you could also use some custom storage method, like a dictionary `character.db.skills = {"Hunting":34, "Fishing":20, ...}`. A much more fancy solution is to look at the [Trait handler contrib](../Contribs/Contrib-Traits.md). Finally you could even go with a [custom django model](../Concepts/Models.md). Which is the better depends on your game and the complexity of your system.
+- Make a clear [API](https://en.wikipedia.org/wiki/Application_programming_interface) into your rules. That is, make methods/functions that you feed with, say, your Character and which skill you want to check. That is, you want something similar to this:
 
     ```python
         from world import rules
@@ -62,33 +55,21 @@ want to check. That is, you want something similar to this:
         result = rules.roll_challenge(character1, character2, "swords")
     ```
 
-You might need to make these functions more or less complex depending on your game. For example the
-properties of the room might matter to the outcome of a roll (if the room is dark, burning etc).
-Establishing just what you need to send into your game mechanic module is a great way to also get a
-feel for what you need to add to your engine.
+You might need to make these functions more or less complex depending on your game. For example the properties of the room might matter to the outcome of a roll (if the room is dark, burning etc). Establishing just what you need to send into your game mechanic module is a great way to also get a feel for what you need to add to your engine.
 
 ## Coded systems
 
-Inspired by tabletop role playing games, most game systems mimic some sort of die mechanic. To this
-end Evennia offers a full [dice
-roller](https://github.com/evennia/evennia/blob/master/evennia/contrib/dice.py) in its `contrib`
-folder. For custom implementations, Python offers many ways to randomize a result using its in-built
-`random` module. No matter how it's implemented, we will in this text refer to the action of
-determining an outcome as a "roll".
+Inspired by tabletop role playing games, most game systems mimic some sort of die mechanic. To this end Evennia offers a full [dice roller contribution](../Contribs/Contrib-Dice.md). For custom implementations, Python offers many ways to randomize a result using its in-built `random` module. No matter how it's implemented, we will in this text refer to the action of determining an outcome as a "roll".
 
 In a freeform system, the result of the roll is just compared with values and people (or the game
-master) just agree on what it means. In a coded system the result now needs to be processed somehow.
-There are many things that may happen as a result of rule enforcement:
+master) just agree on what it means. In a coded system the result now needs to be processed somehow. There are many things that may happen as a result of rule enforcement:
 
 - Health may be added or deducted. This can effect the character in various ways.
-- Experience may need to be added, and if a level-based system is used, the player might need to be
-informed they have increased a level.
+- Experience may need to be added, and if a level-based system is used, the player might need to be informed they have increased a level.
 - Room-wide effects need to be reported to the room, possibly affecting everyone in the room.
 
 There are also a slew of other things that fall under "Coded systems", including things like
-weather, NPC artificial intelligence and game economy. Basically everything about the world that a
-Game master would control in a tabletop role playing game can be mimicked to some level by coded
-systems.
+weather, NPC artificial intelligence and game economy. Basically everything about the world that a Game master would control in a tabletop role playing game can be mimicked to some level by coded systems.
 
 
 ## Example of Rule module
@@ -96,24 +77,17 @@ systems.
 Here is a simple example of a rule module. This is what we assume about our simple example game:
 - Characters have only four numerical values:
     - Their `level`, which starts at 1.
-    - A skill `combat`, which determines how good they are at hitting things. Starts between 5 and
-10.
+    - A skill `combat`, which determines how good they are at hitting things. Starts between 5 and 10.
     - Their Strength, `STR`, which determine how much damage they do. Starts between 1 and 10.
     - Their Health points, `HP`, which starts at 100.
-- When a Character reaches `HP = 0`, they are presumed "defeated". Their HP is reset and they get a
-failure message (as a stand-in for death code).
+- When a Character reaches `HP = 0`, they are presumed "defeated". Their HP is reset and they get a failure message (as a stand-in for death code).
 - Abilities are stored as simple Attributes on the Character.
-- "Rolls" are done by rolling a 100-sided die. If the result is below the `combat` value, it's a
-success and damage is rolled. Damage is rolled as a six-sided die + the value of `STR` (for this
-example we ignore weapons and assume `STR` is all that matters).
-- Every successful `attack` roll gives 1-3 experience points (`XP`). Every time the number of `XP`
-reaches `(level + 1) ** 2`, the Character levels up. When leveling up, the Character's `combat`
-value goes up by 2 points and `STR` by one (this is a stand-in for a real progression system).
+- "Rolls" are done by rolling a 100-sided die. If the result is below the `combat` value, it's a success and damage is rolled. Damage is rolled as a six-sided die + the value of `STR` (for this example we ignore weapons and assume `STR` is all that matters).
+- Every successful `attack` roll gives 1-3 experience points (`XP`). Every time the number of `XP` reaches `(level + 1) ** 2`, the Character levels up. When leveling up, the Character's `combat` value goes up by 2 points and `STR` by one (this is a stand-in for a real progression system).
 
 ### Character
 
-The Character typeclass is simple. It goes in `mygame/typeclasses/characters.py`. There is already
-an empty `Character` class there that Evennia will look to and use.
+The Character typeclass is simple. It goes in `mygame/typeclasses/characters.py`. There is already an empty `Character` class there that Evennia will look to and use.
 
 ```python
 from random import randint

@@ -1,8 +1,8 @@
-# Character Creator contrib
-
-Commands for managing and initiating an in-game character-creation menu.
+# Character Creator
 
 Contribution by InspectorCaracal, 2022
+
+Commands for managing and initiating an in-game character-creation menu.
 
 ## Installation
 

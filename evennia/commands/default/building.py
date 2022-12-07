@@ -6,6 +6,7 @@ import re
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Max, Min, Q
+
 from evennia import InterruptCommand
 from evennia.commands.cmdhandler import get_and_merge_cmdsets
 from evennia.locks.lockhandler import LockException
@@ -789,12 +790,12 @@ class CmdDestroy(COMMAND_DEFAULT_CLASS):
                         "object before continuing."
                     )
 
-                had_exits = hasattr(obj, "exits") and obj.exits
-                had_objs = hasattr(obj, "contents") and any(
-                    obj
-                    for obj in obj.contents
-                    if not (hasattr(obj, "exits") and obj not in obj.exits)
-                )
+                # check if object to delete had exits or objects inside it
+                obj_exits = obj.exits if hasattr(obj, "exits") else ()
+                obj_contents = obj.contents if hasattr(obj, "contents") else ()
+                had_exits = bool(obj_exits)
+                had_objs = any(entity for entity in obj_contents if entity not in obj_exits)
+
                 # do the deletion
                 okay = obj.delete()
                 if not okay:
@@ -970,8 +971,8 @@ class CmdDig(ObjManipCommand):
                 if new_to_exit.aliases.all():
                     alias_string = " (%s)" % ", ".join(new_to_exit.aliases.all())
                 exit_to_string = (
-                    "\nCreated Exit from {location.name} to {new_room.name}:"
-                    " {new_to_exit}({new_to_exit.dbref}){alias_string}."
+                    f"\nCreated Exit from {location.name} to {new_room.name}:"
+                    f" {new_to_exit}({new_to_exit.dbref}){alias_string}."
                 )
 
         # Create exit back from new room
@@ -3354,21 +3355,33 @@ class CmdScripts(COMMAND_DEFAULT_CLASS):
         "pause": "|Paused|n",
         "delete": "|rDeleted|n",
     }
+    # never show these script types
+    hide_script_paths = ("evennia.prototypes.prototypes.DbPrototype",)
 
     def _search_script(self, args):
         # test first if this is a script match
-        scripts = ScriptDB.objects.get_all_scripts(key=args)
+        scripts = ScriptDB.objects.get_all_scripts(key=args).exclude(
+            db_typeclass_path__in=self.hide_script_paths
+        )
         if scripts:
             return scripts
         # try typeclass path
-        scripts = ScriptDB.objects.filter(db_typeclass_path__iendswith=args)
+        scripts = (
+            ScriptDB.objects.filter(db_typeclass_path__iendswith=args)
+            .exclude(db_typeclass_path__in=self.hide_script_paths)
+            .order_by("id")
+        )
         if scripts:
             return scripts
         if "-" in args:
             # may be a dbref-range
             val1, val2 = (dbref(part.strip()) for part in args.split("-", 1))
             if val1 and val2:
-                scripts = ScriptDB.objects.filter(id__in=(range(val1, val2 + 1)))
+                scripts = (
+                    ScriptDB.objects.filter(id__in=(range(val1, val2 + 1)))
+                    .exclude(db_typeclass_path__in=self.hide_script_paths)
+                    .order_by("id")
+                )
                 if scripts:
                     return scripts
 
@@ -3379,7 +3392,7 @@ class CmdScripts(COMMAND_DEFAULT_CLASS):
 
         if not self.args:
             # show all scripts
-            scripts = ScriptDB.objects.all()
+            scripts = ScriptDB.objects.all().exclude(db_typeclass_path__in=self.hide_script_paths)
             if not scripts:
                 caller.msg("No scripts found.")
                 return
@@ -3417,7 +3430,9 @@ class CmdScripts(COMMAND_DEFAULT_CLASS):
                         )
                 else:
                     # just show all scripts on object
-                    scripts = ScriptDB.objects.filter(db_obj=obj)
+                    scripts = ScriptDB.objects.filter(db_obj=obj).exclude(
+                        db_typeclass_path__in=self.hide_script_paths
+                    )
                     if scripts:
                         ScriptEvMore(caller, scripts.order_by("id"), session=self.session)
                     else:
@@ -3449,7 +3464,9 @@ class CmdScripts(COMMAND_DEFAULT_CLASS):
             # modification switches - must operate on existing scripts
 
             if not scripts:
-                scripts = ScriptDB.objects.filter(db_obj=obj)
+                scripts = ScriptDB.objects.filter(db_obj=obj).exclude(
+                    db_typeclass_path__in=self.hide_script_paths
+                )
 
             if scripts.count() > 1:
                 ret = yield (

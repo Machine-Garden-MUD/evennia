@@ -320,8 +320,10 @@ ATTRIBUTE_STORED_MODEL_RENAME = [
     (("players", "playerdb"), ("accounts", "accountdb")),
     (("typeclasses", "defaultplayer"), ("typeclasses", "defaultaccount")),
 ]
-# Default type of autofield (required by Django)
-DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+# Default type of autofield (required by Django), which defines the type of
+# primary key fields for all tables. This type is guaranteed to be at least a
+# 64-bit integer.
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ######################################################################
 # Evennia webclient options
@@ -604,8 +606,6 @@ OPTIONS_ACCOUNT_DEFAULT = {
     "footer_text_color": ("Text inside Footer Lines.", "Color", "n"),
     "footer_fill": ("Fill for Footer Lines.", "Text", "="),
     "column_names_color": ("Table column header text.", "Color", "w"),
-    "help_category_color": ("Help category names.", "Color", "n"),
-    "help_entry_color": ("Help entry names.", "Color", "n"),
     "timezone": ("Timezone for dates.", "Timezone", "UTC"),
 }
 # Modules holding Option classes, responsible for serializing the option and
@@ -837,7 +837,6 @@ DEFAULT_CHANNELS = [
         "aliases": ("pub",),
         "desc": "Public discussion",
         "locks": "control:perm(Admin);listen:all();send:all()",
-        "typeclass": BASE_CHANNEL_TYPECLASS,
     }
 ]
 
@@ -894,6 +893,21 @@ GRAPEVINE_CHANNELS = ["gossip", "testing"]
 # them. These are secret and should thus be overridden in secret_settings file
 GRAPEVINE_CLIENT_ID = ""
 GRAPEVINE_CLIENT_SECRET = ""
+# Discord (discord.com) is a popular communication service for many, especially
+# for game communities. Evennia's channels can be connected to Discord channels
+# and relay messages between Evennia and Discord. To use, you will need to create
+# your own Discord application and bot.
+# Discord also requires installing the pyopenssl library.
+# Full step-by-step instructions are available in the official Evennia documentation.
+DISCORD_ENABLED = False
+# The Intents bitmask required by Discord bots to request particular API permissions.
+# By default, this includes the basic guild status and message read/write flags.
+DISCORD_BOT_INTENTS = 105985
+# The authentication token for the Discord bot. This should be kept secret and
+# put in your secret_settings file.
+DISCORD_BOT_TOKEN = None
+# The account typeclass which the Evennia-side Discord relay bot will use.
+DISCORD_BOT_CLASS = "evennia.accounts.bots.DiscordBot"
 
 ######################################################################
 # Django web features

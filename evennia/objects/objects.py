@@ -13,11 +13,13 @@ from collections import defaultdict
 import inflect
 from django.conf import settings
 from django.utils.translation import gettext as _
+
 from evennia.commands import cmdset
 from evennia.commands.cmdsethandler import CmdSetHandler
 from evennia.objects.manager import ObjectManager
 from evennia.objects.models import ObjectDB
 from evennia.scripts.scripthandler import ScriptHandler
+from evennia.server.signals import SIGNAL_EXIT_TRAVERSED
 from evennia.typeclasses.attributes import ModelAttributeBackend, NickHandler
 from evennia.typeclasses.models import TypeclassBase
 from evennia.utils import ansi, create, funcparser, logger, search
@@ -329,6 +331,7 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
         nofound_string=None,
         multimatch_string=None,
         use_dbref=None,
+        tags=None,
         stacked=0,
     ):
         """
@@ -392,6 +395,8 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
                 will be treated like a normal string. If `None` (default), the ability to query by
                 #dbref is turned on if `self` has the permission 'Builder' and is turned off
                 otherwise.
+            tags (list or tuple): Find objects matching one or more Tags. This should be one or
+                more tag definitions on the form `tagname` or `(tagname, tagcategory)`.
             stacked (int, optional): If > 0, multimatches will be analyzed to determine if they
                 only contains identical objects; these are then assumed 'stacked' and no multi-match
                 error will be generated, instead `stacked` number of matches will be returned. If
@@ -461,13 +466,17 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
                     # included in location.contents
                     candidates.append(self)
 
-        results = ObjectDB.objects.object_search(
+        if tags:
+            tags = [(tagkey, tagcat[0] if tagcat else None) for tagkey, *tagcat in make_iter(tags)]
+
+        results = ObjectDB.objects.search_object(
             searchdata,
             attribute_name=attribute_name,
             typeclass=typeclass,
             candidates=candidates,
             exact=exact,
             use_dbref=use_dbref,
+            tags=tags,
         )
 
         if use_locks:
@@ -1238,7 +1247,8 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
             looker (Object): Onlooker. Not used by default.
 
         Keyword Args:
-            key (str): Optional key to pluralize, if given, use this instead of the object's key.
+            key (str): Optional key to pluralize. If not given, the object's `.name` property is
+                used.
 
         Returns:
             tuple: This is a tuple `(str, str)` with the singular and plural forms of the key
@@ -1250,7 +1260,7 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
 
         """
         plural_category = "plural_key"
-        key = kwargs.get("key", self.key)
+        key = kwargs.get("key", self.name)
         key = ansi.ANSIString(key)  # this is needed to allow inflection of colored names
         try:
             plural = _INFLECT.plural(key, count)
@@ -2879,6 +2889,7 @@ class ExitCommand(_COMMAND_DEFAULT_CLASS):
         if self.obj.access(self.caller, "traverse"):
             # we may traverse the exit.
             self.obj.at_traverse(self.caller, self.obj.destination)
+            SIGNAL_EXIT_TRAVERSED.send(sender=self.obj, traverser=self.caller)
         else:
             # exit is locked
             if self.obj.db.err_traverse:

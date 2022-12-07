@@ -22,6 +22,7 @@ import time
 from codecs import lookup as codecs_lookup
 
 from django.conf import settings
+
 from evennia.server.sessionhandler import SESSIONS
 from evennia.utils import create, logger, search, utils
 
@@ -986,7 +987,7 @@ class CmdQuell(COMMAND_DEFAULT_CLASS):
         """Perform the command"""
         account = self.account
         permstr = (
-            account.is_superuser and " (superuser)" or "(%s)" % ", ".join(account.permissions.all())
+            account.is_superuser and "(superuser)" or "(%s)" % ", ".join(account.permissions.all())
         )
         if self.cmdstring in ("unquell", "unquell"):
             if not account.attributes.get("_quell"):
@@ -1010,7 +1011,7 @@ class CmdQuell(COMMAND_DEFAULT_CLASS):
                 cpermstr += "\nUse unquell to return to normal permission usage."
                 self.msg(cpermstr)
             else:
-                self.msg(f"Quelling Account permissions{permstr}. Use unquell to get them back.")
+                self.msg(f"Quelling Account permissions {permstr}. Use unquell to get them back.")
         self._recache_locks(account)
 
 

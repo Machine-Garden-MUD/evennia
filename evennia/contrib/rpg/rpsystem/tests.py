@@ -3,13 +3,14 @@ Tests for RP system
 
 """
 import time
+
 from anything import Anything
+
+from evennia import create_object
 from evennia.commands.default.tests import BaseEvenniaCommandTest
 from evennia.utils.test_resources import BaseEvenniaTest
-from evennia import create_object
 
-from . import rpsystem
-from . import rplanguage
+from . import rplanguage, rpsystem
 
 mtrans = {"testing": "1", "is": "2", "a": "3", "human": "4"}
 atrans = ["An", "automated", "advantageous", "repeatable", "faster"]
@@ -88,7 +89,6 @@ class TestLanguage(BaseEvenniaTest):
 
 # Testing of emoting / sdesc / recog system
 
-
 sdesc0 = "A nice sender of emotes"
 sdesc1 = "The first receiver of emotes."
 sdesc2 = "Another nice colliding sdesc-guy for tests"
@@ -114,6 +114,17 @@ class TestRPSystem(BaseEvenniaTest):
         self.receiver2 = create_object(
             rpsystem.ContribRPCharacter, key="Receiver2", location=self.room
         )
+
+    def test_posed_contents(self):
+        self.obj1 = create_object(rpsystem.ContribRPObject, key="thing", location=self.room)
+        self.obj2 = create_object(rpsystem.ContribRPObject, key="thing", location=self.room)
+        self.obj3 = create_object(rpsystem.ContribRPObject, key="object", location=self.room)
+        room_display = self.room.return_appearance(self.speaker)
+        self.assertIn("An object and two things are here.", room_display)
+        self.obj3.db.pose = "is on the ground."
+        room_display = self.room.return_appearance(self.speaker)
+        self.assertIn("Two things are here.", room_display)
+        self.assertIn("An object is on the ground.", room_display)
 
     def test_sdesc_handler(self):
         self.speaker.sdesc.add(sdesc0)

@@ -17,6 +17,9 @@ from unittest.mock import MagicMock, Mock, patch
 from anything import Anything
 from django.conf import settings
 from django.test import override_settings
+from parameterized import parameterized
+from twisted.internet import task
+
 from evennia import (
     DefaultCharacter,
     DefaultExit,
@@ -28,7 +31,14 @@ from evennia import (
 from evennia.commands import cmdparser
 from evennia.commands.cmdset import CmdSet
 from evennia.commands.command import Command, InterruptCommand
-from evennia.commands.default import account, admin, batchprocess, building, comms, general
+from evennia.commands.default import (
+    account,
+    admin,
+    batchprocess,
+    building,
+    comms,
+    general,
+)
 from evennia.commands.default import help as help_module
 from evennia.commands.default import syscommands, system, unloggedin
 from evennia.commands.default.cmdset_character import CharacterCmdSet
@@ -38,8 +48,6 @@ from evennia.server.sessionhandler import SESSIONS
 from evennia.utils import create, gametime, utils
 from evennia.utils.test_resources import BaseEvenniaCommandTest  # noqa
 from evennia.utils.test_resources import BaseEvenniaTest, EvenniaCommandTest
-from parameterized import parameterized
-from twisted.internet import task
 
 # ------------------------------------------------------------
 # Command testing
@@ -1584,8 +1592,9 @@ class TestBuilding(BaseEvenniaCommandTest):
         self.call(
             building.CmdTeleport(),
             "Obj = Room2",
-            "Obj(#{}) is leaving Room(#{}), heading for Room2(#{}).|Teleported Obj -> Room2."
-            .format(oid, rid, rid2),
+            "Obj(#{}) is leaving Room(#{}), heading for Room2(#{}).|Teleported Obj -> Room2.".format(
+                oid, rid, rid2
+            ),
         )
         self.call(building.CmdTeleport(), "NotFound = Room", "Could not find 'NotFound'.")
         self.call(
@@ -1701,8 +1710,7 @@ class TestBuilding(BaseEvenniaCommandTest):
         self.call(
             building.CmdSpawn(),
             "{'prototype_key':'GOBLIN', 'typeclass':'evennia.objects.objects.DefaultCharacter', "
-            "'key':'goblin', 'location':'%s'}"
-            % spawnLoc.dbref,
+            "'key':'goblin', 'location':'%s'}" % spawnLoc.dbref,
             "Spawned goblin",
         )
         goblin = get_object(self, "goblin")
@@ -1750,8 +1758,7 @@ class TestBuilding(BaseEvenniaCommandTest):
         self.call(
             building.CmdSpawn(),
             "/noloc {'prototype_parent':'TESTBALL', 'key': 'Ball', 'prototype_key': 'foo',"
-            " 'location':'%s'}"
-            % spawnLoc.dbref,
+            " 'location':'%s'}" % spawnLoc.dbref,
             "Spawned Ball",
         )
         ball = get_object(self, "Ball")
@@ -1993,6 +2000,58 @@ class TestComms(BaseEvenniaCommandTest):
             "|You paged TestAccount2 with: 'Test'.",
             receiver=self.account,
         )
+
+
+@override_settings(DISCORD_BOT_TOKEN="notarealtoken", DISCORD_ENABLED=True)
+class TestDiscord(BaseEvenniaCommandTest):
+    def setUp(self):
+        super().setUp()
+        self.channel = create.create_channel(key="testchannel", desc="A test channel")
+        self.cmddiscord = cmd_comms.CmdDiscord2Chan
+        self.cmddiscord.account_caller = False
+        # create bot manually so it doesn't get started
+        self.discordbot = create.create_account(
+            "DiscordBot", None, None, typeclass="evennia.accounts.bots.DiscordBot"
+        )
+
+    def tearDown(self):
+        if self.channel.pk:
+            self.channel.delete()
+
+    @parameterized.expand(
+        [
+            ("", "No Discord connections found."),
+            ("/list", "No Discord connections found."),
+            ("/guild", "Messages to Evennia will include the Discord server."),
+            ("/channel", "Relayed messages will include the originating channel."),
+        ]
+    )
+    def test_discord__switches(self, cmd_args, expected):
+        self.call(self.cmddiscord(), cmd_args, expected)
+
+    def test_discord__linking(self):
+        self.call(
+            self.cmddiscord(), "nosuchchannel = 5555555", "There is no channel 'nosuchchannel'"
+        )
+        self.call(
+            self.cmddiscord(),
+            "testchannel = 5555555",
+            "Discord connection created: testchannel <-> #5555555",
+        )
+        self.assertTrue(self.discordbot in self.channel.subscriptions.all())
+        self.assertTrue(("testchannel", "5555555") in self.discordbot.db.channels)
+        self.call(self.cmddiscord(), "testchannel = 5555555", "Those channels are already linked.")
+
+    def test_discord__list(self):
+        self.discordbot.db.channels = [("testchannel", "5555555")]
+        cmdobj = self.cmddiscord()
+        cmdobj.msg = lambda text, **kwargs: setattr(self, "out", str(text))
+        self.call(cmdobj, "", None)
+        self.assertIn("testchannel", self.out)
+        self.assertIn("5555555", self.out)
+        self.call(cmdobj, "testchannel", None)
+        self.assertIn("testchannel", self.out)
+        self.assertIn("5555555", self.out)
 
 
 class TestBatchProcess(BaseEvenniaCommandTest):

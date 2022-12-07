@@ -20,6 +20,7 @@ from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.utils import timezone
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext as _
+
 from evennia.accounts.manager import AccountManager
 from evennia.accounts.models import AccountDB
 from evennia.commands.cmdsethandler import CmdSetHandler
@@ -37,7 +38,13 @@ from evennia.typeclasses.attributes import ModelAttributeBackend, NickHandler
 from evennia.typeclasses.models import TypeclassBase
 from evennia.utils import class_from_module, create, logger
 from evennia.utils.optionhandler import OptionHandler
-from evennia.utils.utils import is_iter, lazy_property, make_iter, to_str, variable_from_module
+from evennia.utils.utils import (
+    is_iter,
+    lazy_property,
+    make_iter,
+    to_str,
+    variable_from_module,
+)
 
 __all__ = ("DefaultAccount", "DefaultGuest")
 
@@ -1053,7 +1060,7 @@ class DefaultAccount(AccountDB, metaclass=TypeclassBase):
                 # normal message
                 message = f"{sender_string}: {message}"
 
-        if not kwargs.get("no_prefix") or not kwargs.get("emit"):
+        if not kwargs.get("no_prefix") and not kwargs.get("emit"):
             message = channel.channel_prefix() + message
 
         return message
