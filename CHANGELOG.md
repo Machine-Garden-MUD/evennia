@@ -2,7 +2,33 @@
 
 ## Main branch
 
-Updated dependencies: Django >5.1 (<5,2), Twisted >24 (<25).
+- [Fix][pull3799]: Fix typo in `basic_tc.py` contrib for beginner tutorial (Tharic99)
+- [Fix][pull3806]: EvMore wouldn't pass Session to next cmd when exiting (gas-public-wooden-clean)
+- [Doc][pull3801]: Move Evennia doc build system to latest Sphinx/myST
+  (PowershellNinja, also honorary mention to electroglyph)
+- [Doc][pull3800]: Describe support for Telnet SSH in HAProxy documentation (holl0wstar)
+
+[pull3799]: https://github.com/evennia/evennia/issues/3799
+[pull3800]: https://github.com/evennia/evennia/issues/3800
+[pull3801]: https://github.com/evennia/evennia/issues/3801
+[pull3806]: https://github.com/evennia/evennia/issues/3806
+
+
+## Evennia 5.0.1
+
+Jul 2, 2025
+
+- [Fix][issue3796]: Fix Django version minimum string being too picky, causing
+  confusing warning message on startup (Griatch)
+
+[issue3796]: https://github.com/evennia/evennia/issues/3796
+
+
+## Evennia 5.0.0
+
+Jul 1, 2025
+
+Updated dependencies: Django >5.2 (<5.3), Twisted >24 (<25).
 Python versions: 3.11, 3.12, 3.13.
 
 This upgrade requires running `evennia migrate` on your existing database
@@ -17,6 +43,8 @@ This upgrade requires running `evennia migrate` on your existing database
 - [Feat][pull3756]: Updated German translation (JohnFi)
 - [Feat][pull3757]: Add more i18n strings to `DefaultObject` for easier translation (JohnFi)
 - [Feat][pull3783]: Support users of `ruff` linter by adding compatible config in `pyproject.toml` (jaborsh)
+- [Feat][pull3777]: New contrib `debugpy` for debugging Evennia with in VSCode with `debugpy` adapter (electroglyph)
+- [Feat][pull3795]: Support evennia launcher for use with `uv` installation (TehomCD)
 - [Fix][pull3677]: Make sure that `DefaultAccount.create` normalizes to empty
   strings instead of `None` if no name is provided, also enforce string type (InspectorCaracal)
 - [Fix][pull3682]: Allow in-game help searching for commands natively starting
@@ -50,6 +78,8 @@ This upgrade requires running `evennia migrate` on your existing database
 - [Fix][pull3768]: Make sure the `CmdCopy` command copies object categories,
   since otherwise plurals were lost (jaborsh)
 - [Fix][issue3788]: `GLOBAL_SCRIPTS.all()` raised error (Griatch)
+- [Fix][issue3790]: Fix migration issue due to new db init-check code in launcher (Griatch)
+- [Fix][issue3794]: Make sure to pass `move_type` kwarg to `at_pre_object_receive|leave` hooks (Griatch)
 - Fix: `options` setting `NOPROMPTGOAHEAD` was not possible to set (Griatch)
 - Fix: Make `\\` properly preserve one backlash in funcparser (Griatch)
 - Fix: The testing 'echo' inputfunc didn't work correctly; now returns both args/kwargs (Griatch)
@@ -87,9 +117,13 @@ This upgrade requires running `evennia migrate` on your existing database
 [pull3757]: https://github.com/evennia/evennia/pull/3757
 [pull3768]: https://github.com/evennia/evennia/pull/3768
 [pull3783]: https://github.com/evennia/evennia/pull/3783
+[pull3777]: https://github.com/evennia/evennia/pull/3777
+[pull3794]: https://github.com/evennia/evennia/pull/3794
+[pull3795]: https://github.com/evennia/evennia/pull/3795
 [issue3688]: https://github.com/evennia/evennia/issues/3688
 [issue3687]: https://github.com/evennia/evennia/issues/3687
 [issue3788]: https://github.com/evennia/evennia/issues/3788
+[issue3790]: https://github.com/evennia/evennia/issues/3790
 
 
 

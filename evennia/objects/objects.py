@@ -10,11 +10,10 @@ import time
 import typing
 from collections import defaultdict
 
+import evennia
 import inflect
 from django.conf import settings
 from django.utils.translation import gettext as _
-
-import evennia
 from evennia.commands import cmdset
 from evennia.commands.cmdsethandler import CmdSetHandler
 from evennia.objects.manager import ObjectManager
@@ -1268,7 +1267,7 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
             # check if source location lets us go
             try:
                 if source_location and not source_location.at_pre_object_leave(
-                    self, destination, **kwargs
+                    self, destination, move_type=move_type, **kwargs
                 ):
                     return False
             except Exception as err:
@@ -1277,7 +1276,7 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
             # check if destination accepts us
             try:
                 if destination and not destination.at_pre_object_receive(
-                    self, source_location, **kwargs
+                    self, source_location, move_type=move_type, **kwargs
                 ):
                     return False
             except Exception as err:
