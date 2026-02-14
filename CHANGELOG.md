@@ -25,6 +25,7 @@
   ANSIString after reset (speeds up EvForm other string ops, fixes compatibility) (count-infinity)
 - [Fix][pull3853]: Properly handle multimatch separations with native dashes, like
   't-shirt-1' (count-infinity)
+- [Fix][pull3733]: Allow `CmdSetAttribute` to use categery, view dicts by key (InspectorCaracal)
 - [Doc][pull3801]: Move Evennia doc build system to latest Sphinx/myST
   (PowershellNinja, also honorary mention to electroglyph)
 - [Doc][pull3800]: Describe support for Telnet SSH in HAProxy documentation (holl0wstar)
@@ -51,6 +52,7 @@
 [pull3852]: https://github.com/evennia/evennia/pull/3852
 [pull3853]: https://github.com/evennia/evennia/pull/3853
 [pull3854]: https://github.com/evennia/evennia/pull/3853
+[pull3733]: https://github.com/evennia/evennia/pull/3853
 
 
 ## Evennia 5.0.1
