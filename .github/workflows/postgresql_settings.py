@@ -46,7 +46,18 @@ DATABASES = {
         "PASSWORD": "password",
         "HOST": "localhost",
         "PORT": "",  # use default
-        "TEST": {"NAME": "default"},
+        # Fail fast in CI if queries block or run unreasonably long so hangs
+        # produce actionable errors instead of job-level timeout cancellations.
+        "OPTIONS": {
+            "options": (
+                "-c lock_timeout=30000 "
+                "-c statement_timeout=300000 "
+                "-c idle_in_transaction_session_timeout=60000"
+            )
+        },
+        # Keep this explicit and distinct from the default alias/database to avoid
+        # any ambiguity when using Django's test runner in CI.
+        "TEST": {"NAME": "test_evennia"},
     }
 }
 

@@ -102,7 +102,13 @@ runs:
       if: ${{ inputs.coverage-test != 'true' }}
       working-directory: testing_mygame
       run: |
-        evennia test --settings=settings --keepdb --timing evennia
+        if [ "${{ inputs.testing-db }}" = "postgresql" ]; then
+          # PostgreSQL runs in CI have historically been sensitive to reusing
+          # stale test DB state; run with explicit verbosity for easier diagnosis.
+          evennia test --settings=settings --timing -v 2 evennia
+        else
+          evennia test --settings=settings --keepdb --timing evennia
+        fi
       shell: bash
 
     # OBS - it's important to not run the coverage tests with --parallel, it messes up the coverage
