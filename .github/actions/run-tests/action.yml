@@ -23,7 +23,7 @@ inputs:
     required: false
     default: "false"
   needs-postgres-package:
-    description: "Whether to install psycopg2-binary package (true/false)."
+    description: "Whether to install psycopg package (true/false)."
     required: false
     default: "false"
   coveralls-token:
@@ -48,7 +48,7 @@ runs:
         python -m pip install --upgrade pip
         pip install wheel
         if [ "${{ inputs.needs-postgres-package }}" == "true" ]; then
-          pip install psycopg2-binary==2.9.5   # req by postgresql
+          pip install "psycopg[binary]>=3.1.0"   # req by postgresql
         fi
         if [ "${{ inputs.needs-mysql-package }}" == "true" ]; then
           pip install mysqlclient

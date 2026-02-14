@@ -19,9 +19,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.12", "3.13", "3.14"]
         include:
-          - python-version: "3.11"
+          - python-version: "3.12"
             coverage-test: true
 
     timeout-minutes: 30
@@ -52,7 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.12", "3.13", "3.14"]
 
     timeout-minutes: 35
 
@@ -95,7 +95,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.12", "3.13", "3.14"]
 
     timeout-minutes: 35
 

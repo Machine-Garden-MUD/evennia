@@ -2,10 +2,10 @@
 
 ## Main branch
 
-- Dependency changes: Python 3.12, 3.13, 3.14 (dropping support for Python 3.11)
-- Security dependency updates: Django >5.2.8 (<5.3), Django RestFramework 3.16
-- Update: XYZGrid contrib using scipy 1.15->1.17. Pathfinding may pick different
-  shortest routes from before, due to underlying scipy Dijkstra pathfinding changes (Griatch)
+- Feat (backwards incompatble): Drop Python 3.11 support (supported: Python 3.12, 3.13, 3.14 (req)). (Griatch)
+- Security: Django >=6.0.2 (<6.1), Django RestFramework 3.16 (Griatch)
+- Update: `XYZGrid` contrib now requires scipy 1.15->1.17. Note: Pathfinding may pick different
+  shortest routes from before, due to private changes in scipy Dijkstra algorithm (Griatch)
 - [Feat][pull3599]: Make `at_pre_cmd` testable in unit tests (blongden)
 - [Fix]: API /openapi/setattribute endpoints were both POST and PUT, causing schema
   errors; now changed to PUT only. (Griatch)
