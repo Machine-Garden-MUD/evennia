@@ -26,6 +26,7 @@
 - [Fix][pull3853]: Properly handle multimatch separations with native dashes, like
   't-shirt-1' (count-infinity)
 - [Fix][pull3733]: Allow `CmdSetAttribute` to use categery, view dicts by key (InspectorCaracal)
+- [Fix][issue3858]: Fix parsing issues in dice contrib (Griatch)
 - [Doc][pull3801]: Move Evennia doc build system to latest Sphinx/myST
   (PowershellNinja, also honorary mention to electroglyph)
 - [Doc][pull3800]: Describe support for Telnet SSH in HAProxy documentation (holl0wstar)
@@ -53,6 +54,7 @@
 [pull3853]: https://github.com/evennia/evennia/pull/3853
 [pull3854]: https://github.com/evennia/evennia/pull/3853
 [pull3733]: https://github.com/evennia/evennia/pull/3853
+[issue3858]: https://github.com/evennia/evennia/issues/3858
 
 
 ## Evennia 5.0.1
