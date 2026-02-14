@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         python-version: ["3.12", "3.13", "3.14"]
         include:
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         python-version: ["3.12", "3.13", "3.14"]
 
@@ -93,11 +93,11 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         python-version: ["3.12", "3.13", "3.14"]
 
-    timeout-minutes: 35
+    timeout-minutes: 45
 
     services:
       postgres:
