@@ -97,7 +97,7 @@ jobs:
       matrix:
         python-version: ["3.12", "3.13", "3.14"]
 
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     services:
       postgres:

@@ -44,7 +44,7 @@ DATABASES = {
         "NAME": "evennia",
         "USER": "evennia",
         "PASSWORD": "password",
-        "HOST": "localhost",
+        "HOST": "127.0.0.1",
         "PORT": "",  # use default
         # Fail fast in CI if queries block or run unreasonably long so hangs
         # produce actionable errors instead of job-level timeout cancellations.
