@@ -30,6 +30,8 @@
   't-shirt-1' (count-infinity)
 - [Fix][pull3733]: Allow `CmdSetAttribute` to use categery, view dicts by key (InspectorCaracal)
 - [Fix][issue3858]: Fix parsing issues in dice contrib (Griatch)
+- Fix: `Typeclass.objects.get_by_tag()` will now always convert tag keys/categories to integers, to
+  avoid inconsistencies with PostgreSQL databases (Griatch)
 - [Doc][pull3801]: Move Evennia doc build system to latest Sphinx/myST
   (PowershellNinja, also honorary mention to electroglyph)
 - [Doc][pull3800]: Describe support for Telnet SSH in HAProxy documentation (holl0wstar)
