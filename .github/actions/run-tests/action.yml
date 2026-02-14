@@ -105,7 +105,7 @@ runs:
         if [ "${{ inputs.testing-db }}" = "postgresql" ]; then
           # PostgreSQL runs in CI have historically been sensitive to reusing
           # stale test DB state; run with explicit verbosity for easier diagnosis.
-          evennia test --settings=settings --timing -v 2 evennia
+          evennia test --settings=settings --timing --verbosity 2 evennia
         else
           evennia test --settings=settings --keepdb --timing evennia
         fi
