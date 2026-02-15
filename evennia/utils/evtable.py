@@ -119,7 +119,7 @@ from textwrap import TextWrapper
 
 from django.conf import settings
 
-from evennia.utils.ansi import ANSIString
+from evennia.utils.ansi import ANSIString, strip_mxp
 from evennia.utils.utils import display_len as d_len
 from evennia.utils.utils import is_iter, justify
 
@@ -137,7 +137,7 @@ def _to_ansi(obj):
     if is_iter(obj):
         return [_to_ansi(o) for o in obj]
     else:
-        return ANSIString(obj)
+        return ANSIString(strip_mxp(str(obj)))
 
 
 _whitespace = "\t\n\x0b\x0c\r "
@@ -487,6 +487,7 @@ class EvCell:
         Returns:
             split (list): split text.
         """
+        text = text.replace("\r\n", "\n").replace("\r", "\n")
         return text.split("\n")
 
     def _fit_width(self, data):
@@ -558,7 +559,9 @@ class EvCell:
         aligned = []
         for line in data:
             # Preserve manually spaced/pre-formatted lines (like nested tables).
-            if "  " in line or (line and (line[0].isspace() or line[-1].isspace())):
+            raw_line = line.raw() if hasattr(line, "raw") else str(line)
+            has_link_markup = strip_mxp(raw_line) != raw_line
+            if "  " in line or has_link_markup:
                 line_width = d_len(line)
                 if line_width >= width:
                     aligned.append(justify(line, width, align="a", fillchar=hfill_char))

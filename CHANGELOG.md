@@ -44,6 +44,8 @@
 - [Fix][issue3312]: Handle all edge cases breaking `monitor/monitored` `input_funcs` (Griatch)
 - [Fix][issue3154]: Persistent EvMenu caused multiple cmdsets on reload (Griatch)
 - [Fix][issue3193]: Formatting of inner nested evtable would break (Griatch)
+- [Fix][issue3082]: MXP linking broke EvTable formatting (Griatch)
+- [Fix][issue3693]: MXP linking broke EvTable formatting (Griatch)
 - [Doc][pull3801]: Move Evennia doc build system to latest Sphinx/myST
   (PowershellNinja, also honorary mention to electroglyph)
 - [Doc][pull3800]: Describe support for Telnet SSH in HAProxy documentation (holl0wstar)
@@ -81,6 +83,8 @@
 [issue3312]: https://github.com/evennia/evennia/issues/3312
 [issue3154]: https://github.com/evennia/evennia/issues/3154
 [issue3193]: https://github.com/evennia/evennia/issues/3193
+[issue3082]: https://github.com/evennia/evennia/issues/3082
+[issue3693]: https://github.com/evennia/evennia/issues/3693
 
 
 ## Evennia 5.0.1

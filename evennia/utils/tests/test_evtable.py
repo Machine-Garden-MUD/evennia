@@ -3,8 +3,6 @@ Tests for EvTable component.
 
 """
 
-from unittest import skip
-
 from evennia.utils import ansi, evtable
 from evennia.utils.test_resources import EvenniaTestCase
 
@@ -387,7 +385,6 @@ class TestEvTable(EvenniaTestCase):
         self.assertIn(ANSI_RED, str(table))
         self.assertIn(ANSI_CYAN, str(table))
 
-    @skip("Pending refactor into client-side ansi parsing")
     def test_mxp_links(self):
         """
         Testing https://github.com/evennia/evennia/issues/3082
@@ -399,15 +396,8 @@ class TestEvTable(EvenniaTestCase):
         commands1 = [f"|lcsay This is command {inum}|ltcommand {inum}|le" for inum in range(1, 4)]
         commands2 = [f"command {inum}" for inum in range(1, 4)]  # comparison strings, no MXP
 
-        # from evennia import set_trace
-
-        # set_trace()
-
         cell1 = ansi.strip_mxp(str(evtable.EvCell(f"|lcsay This is command 1|ltcommand 1|le")))
         cell2 = str(evtable.EvCell(f"command 1"))
-
-        print(f"cell1:------------\n{cell1}")
-        print(f"cell2:------------\n{cell2}")
 
         table1a = ansi.strip_mxp(str(evtable.EvTable(*commands1)))
         table1b = str(evtable.EvTable(*commands2))
@@ -415,15 +405,10 @@ class TestEvTable(EvenniaTestCase):
         table2a = ansi.strip_mxp(str(evtable.EvTable(table=[commands1])))
         table2b = str(evtable.EvTable(table=[commands2]))
 
-        print(f"1a:---------------\n{table1a}")
-        print(f"1b:---------------\n{table1b}")
-        print(f"2a:---------------\n{table2a}")
-        print(f"2b:---------------\n{table2b}")
-
+        self.assertEqual(cell2, cell1)
         self.assertEqual(table1b, table1a)
         self.assertEqual(table2b, table2a)
 
-    @skip("Needs to be further invstigated")
     def test_formatting_with_carriage_return_marker_3693_a(self):
         """
         Testing of issue https://github.com/evennia/evennia/issues/3693
@@ -443,7 +428,6 @@ class TestEvTable(EvenniaTestCase):
 """
         self._validate(expected, str(table))
 
-    @skip("Needs to be further invstigated")
     def test_formatting_with_carriage_return_marker_3693_b(self):
         """
         Testing of issue https://github.com/evennia/evennia/issues/3693
@@ -459,8 +443,8 @@ class TestEvTable(EvenniaTestCase):
         expected = """
 |                                                                              |
 +~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+
-| Welcome to your new Evennia-based game! Visit https://www.evennia.com if     |
-| you need help, want to contribute, report issues or just join the community. |
+| Welcome to your new Evennia-based game! Visit https://www.evennia.com if you |
+| need help, want to contribute, report issues or just join the community.     |
 |                                                                              |
 | As a privileged user, write batchcommand tutorial_world.build to build       |
 | tutorial content. Once built, try intro for starting help and tutorial to    |
