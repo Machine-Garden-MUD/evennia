@@ -37,6 +37,7 @@
 - [Fix][issue3649]: The `:j` command in EvEditor would squash empty lines (Griatch)
 - [Fix][issue3560]: Tutorial QuestHandler failed to load after server restart (Griatch)
 - [Fix][issue3601]: `CmdSet.add(..., allow_duplicates=True)` didn't allow duplicate cmd keys (Griatch)
+- [Fix][issue3194]: Make filtering on AttributeProperties consistent across typeclasses (Griatch)
 - [Doc][pull3801]: Move Evennia doc build system to latest Sphinx/myST
   (PowershellNinja, also honorary mention to electroglyph)
 - [Doc][pull3800]: Describe support for Telnet SSH in HAProxy documentation (holl0wstar)
@@ -69,6 +70,7 @@
 [issue3649]: https://github.com/evennia/evennia/issues/3649
 [issue3560]: https://github.com/evennia/evennia/issues/3560
 [issue3601]: https://github.com/evennia/evennia/issues/3601
+[issue3194]: https://github.com/evennia/evennia/issues/3194
 
 
 ## Evennia 5.0.1
