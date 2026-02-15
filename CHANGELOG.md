@@ -46,6 +46,7 @@
 - [Fix][issue3193]: Formatting of inner nested evtable would break (Griatch)
 - [Fix][issue3082]: MXP linking broke EvTable formatting (Griatch)
 - [Fix][issue3693]: Using `|/` in EvTable broke padding (Griatch)
+- [Fix][pull3864]: Correctly use cached dijkstra results for XYZGrid (jaborsh)
 - [Doc][pull3801]: Move Evennia doc build system to latest Sphinx/myST
   (PowershellNinja, also honorary mention to electroglyph)
 - [Doc][pull3800]: Describe support for Telnet SSH in HAProxy documentation (holl0wstar)
@@ -73,6 +74,7 @@
 [pull3853]: https://github.com/evennia/evennia/pull/3853
 [pull3854]: https://github.com/evennia/evennia/pull/3853
 [pull3733]: https://github.com/evennia/evennia/pull/3853
+[pull3864]: https://github.com/evennia/evennia/pull/3864
 [issue3858]: https://github.com/evennia/evennia/issues/3858
 [issue3813]: https://github.com/evennia/evennia/issues/3513
 [issue3649]: https://github.com/evennia/evennia/issues/3649
