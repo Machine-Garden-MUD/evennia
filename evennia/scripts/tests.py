@@ -722,6 +722,60 @@ class TestOnDemandHandler(EvenniaTest):
         self.handler.clear()
         self.handler.save()
 
+    def test_handler_save_purges_unpicklable_task(self):
+        class _UnpicklableValue:
+            def __getstate__(self):
+                raise TypeError("cannot pickle this")
+
+        self.handler.clear()
+        self.handler.save()
+        self.handler.add("good", category="decay", stages={0: "new"})
+        self.handler.add("bad", category=_UnpicklableValue(), stages={0: "new"})
+
+        self.handler.save()
+
+        self.assertEqual(
+            set(self.handler.tasks.keys()),
+            {
+                ("good", "decay"),
+            },
+        )
+        reloaded_handler = OnDemandHandler()
+        reloaded_handler.load()
+        self.assertEqual(
+            set(reloaded_handler.tasks.keys()),
+            {
+                ("good", "decay"),
+            },
+        )
+
+    def test_handler_save_purges_recursive_task(self):
+        class _RecursiveValue:
+            def __getstate__(self):
+                return self.__getstate__()
+
+        self.handler.clear()
+        self.handler.save()
+        self.handler.add("good", category="decay", stages={0: "new"})
+        self.handler.add(_RecursiveValue(), category="loop", stages={0: "new"})
+
+        self.handler.save()
+
+        self.assertEqual(
+            set(self.handler.tasks.keys()),
+            {
+                ("good", "decay"),
+            },
+        )
+        reloaded_handler = OnDemandHandler()
+        reloaded_handler.load()
+        self.assertEqual(
+            set(reloaded_handler.tasks.keys()),
+            {
+                ("good", "decay"),
+            },
+        )
+
     @mock.patch("evennia.scripts.ondemandhandler.OnDemandTask.runtime")
     def test_call_staging_function_with_kwargs(self, mock_runtime):
         """ """
