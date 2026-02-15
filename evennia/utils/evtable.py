@@ -184,19 +184,17 @@ class ANSITextWrapper(TextWrapper):
           'use', ' ', 'the', ' ', '-b', ' ', option!'
         otherwise.
         """
-        # NOTE-PYTHON3: The following code only roughly approximates what this
-        #               function used to do. Regex splitting on ANSIStrings is
-        #               dropping ANSI codes, so we're using ANSIString.split
-        #               for the time being.
-        #
-        #               A less hackier solution would be appreciated.
-        chunks = _to_ansi(text).split()
-
-        chunks = [chunk + " " for chunk in chunks if chunk]  # remove empty chunks
-
-        if len(chunks) > 1:
-            chunks[-1] = chunks[-1][0:-1]
-
+        # ANSIString.split(None) collapses repeated whitespace, which breaks
+        # pre-formatted content (such as nested EvTables). Split on explicit
+        # spaces instead and keep separators as separate chunks.
+        text = _to_ansi(text)
+        parts = text.split(" ")
+        chunks = []
+        for idx, part in enumerate(parts):
+            if part:
+                chunks.append(part)
+            if idx < len(parts) - 1:
+                chunks.append(" ")
         return chunks
 
     def _wrap_chunks(self, chunks):
@@ -557,7 +555,26 @@ class EvCell:
         align = self.align
         hfill_char = self.hfill_char
         width = self.width
-        return [justify(line, width, align=align, fillchar=hfill_char) for line in data]
+        aligned = []
+        for line in data:
+            # Preserve manually spaced/pre-formatted lines (like nested tables).
+            if "  " in line or (line and (line[0].isspace() or line[-1].isspace())):
+                line_width = d_len(line)
+                if line_width >= width:
+                    aligned.append(justify(line, width, align="a", fillchar=hfill_char))
+                    continue
+                pad = width - line_width
+                if align == "r":
+                    aligned.append(hfill_char * pad + line)
+                elif align == "c":
+                    left = pad // 2
+                    right = pad - left
+                    aligned.append(hfill_char * left + line + hfill_char * right)
+                else:
+                    aligned.append(line + hfill_char * pad)
+            else:
+                aligned.append(justify(line, width, align=align, fillchar=hfill_char))
+        return aligned
 
     def _valign(self, data):
         """

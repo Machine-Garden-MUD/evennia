@@ -272,18 +272,13 @@ class TestEvTable(EvenniaTestCase):
         self._validate(expected, str(table))
 
         # add by passing a column to constructor directly
-
         colB = evtable.EvColumn("another", width=8)
-
         table = evtable.EvTable(table=[colB], fill_char=".", pad_char="#")
-
         self._validate(expected, str(table))
 
         # more complex table
-
         colA = evtable.EvColumn("this", "is", "a", "column")  # no width
         colB = evtable.EvColumn("and", "another", "one", "here", width=8)
-
         table = evtable.EvTable(table=[colA, colB], fill_char=".", pad_char="#")
 
         expected = """
@@ -295,8 +290,31 @@ class TestEvTable(EvenniaTestCase):
 |#column#|#here.#|
 +--------+-------+
         """
-
         self._validate(expected, str(table))
+
+    def test_nested_table_preserves_inner_spacing(self):
+        """
+        Testing https://github.com/evennia/evennia/issues/3193
+
+        Nested EvTables should preserve spacing in inner table rows.
+        """
+        content = [evtable.EvColumn(align="r"), evtable.EvColumn(align="l")]
+        content[0].add_rows("Item 1")
+        content[0].add_rows("Item 2")
+        content[1].add_rows("Item 3")
+        content[1].add_rows("Item 4")
+
+        left_table = evtable.EvTable(table=content, border="cells", header=False, width=24, align="l")
+        right_table = evtable.EvTable(
+            table=content, border="cells", header=False, width=24, align="r"
+        )
+        nested_table = evtable.EvTable(
+            table=[[left_table], [right_table]], border="incols", width=55, align="c"
+        )
+
+        rendered = ansi.strip_ansi(str(nested_table))
+        self.assertIn("|    Item 1 | Item 3   |", rendered)
+        self.assertIn("|    Item 2 | Item 4   |", rendered)
 
     def test_width_enforcement(self):
         """
