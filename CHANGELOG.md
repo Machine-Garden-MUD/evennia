@@ -45,7 +45,7 @@
 - [Fix][issue3154]: Persistent EvMenu caused multiple cmdsets on reload (Griatch)
 - [Fix][issue3193]: Formatting of inner nested evtable would break (Griatch)
 - [Fix][issue3082]: MXP linking broke EvTable formatting (Griatch)
-- [Fix][issue3693]: MXP linking broke EvTable formatting (Griatch)
+- [Fix][issue3693]: Using `|/` in EvTable broke padding (Griatch)
 - [Doc][pull3801]: Move Evennia doc build system to latest Sphinx/myST
   (PowershellNinja, also honorary mention to electroglyph)
 - [Doc][pull3800]: Describe support for Telnet SSH in HAProxy documentation (holl0wstar)
