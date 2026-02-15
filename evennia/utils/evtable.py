@@ -561,7 +561,8 @@ class EvCell:
             # Preserve manually spaced/pre-formatted lines (like nested tables).
             raw_line = line.raw() if hasattr(line, "raw") else str(line)
             has_link_markup = strip_mxp(raw_line) != raw_line
-            if "  " in line or has_link_markup:
+            has_manual_spacing = "  " in raw_line.lstrip(" ")
+            if has_manual_spacing or has_link_markup:
                 line_width = d_len(line)
                 if line_width >= width:
                     aligned.append(justify(line, width, align="a", fillchar=hfill_char))
