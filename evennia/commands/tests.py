@@ -1309,6 +1309,21 @@ class TestCmdSet(BaseEvenniaTest):
 
         self.assertIsInstance(result, _CmdTest2)
 
+    def test_cmdset_add_allow_duplicates(self):
+        class _CmdDuplicateA(Command):
+            key = "duplicate"
+
+        class _CmdDuplicateB(Command):
+            key = "duplicate"
+
+        cmdset = CmdSet()
+        cmdset.add(_CmdDuplicateA, allow_duplicates=True)
+        cmdset.add(_CmdDuplicateB, allow_duplicates=True)
+
+        duplicate_cmds = [cmd for cmd in cmdset.commands if cmd.key == "duplicate"]
+        self.assertEqual(len(duplicate_cmds), 2)
+        self.assertEqual({cmd.__class__ for cmd in duplicate_cmds}, {_CmdDuplicateA, _CmdDuplicateB})
+
 
 class _CmdG(Command):
     key = "smile"
