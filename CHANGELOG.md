@@ -38,6 +38,7 @@
 - [Fix][issue3560]: Tutorial QuestHandler failed to load after server restart (Griatch)
 - [Fix][issue3601]: `CmdSet.add(..., allow_duplicates=True)` didn't allow duplicate cmd keys (Griatch)
 - [Fix][issue3194]: Make filtering on AttributeProperties consistent across typeclasses (Griatch)
+- [Fix][issue2774]: Properly support `\n` in `evennia connections` long descriptions (Griatch)
 - [Doc][pull3801]: Move Evennia doc build system to latest Sphinx/myST
   (PowershellNinja, also honorary mention to electroglyph)
 - [Doc][pull3800]: Describe support for Telnet SSH in HAProxy documentation (holl0wstar)
@@ -71,6 +72,7 @@
 [issue3560]: https://github.com/evennia/evennia/issues/3560
 [issue3601]: https://github.com/evennia/evennia/issues/3601
 [issue3194]: https://github.com/evennia/evennia/issues/3194
+[issue2774]: https://github.com/evennia/evennia/issues/2774
 
 
 ## Evennia 5.0.1
