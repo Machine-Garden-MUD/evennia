@@ -42,6 +42,7 @@
 - [Fix][issue3194]: Make filtering on AttributeProperties consistent across typeclasses (Griatch)
 - [Fix][issue2774]: Properly support `\n` in `evennia connections` long descriptions (Griatch)
 - [Fix][issue3312]: Handle all edge cases breaking `monitor/monitored` `input_funcs` (Griatch)
+- [Fix][issue3154]: Persistent EvMenu caused multiple cmdsets on reload (Griatch)
 - [Doc][pull3801]: Move Evennia doc build system to latest Sphinx/myST
   (PowershellNinja, also honorary mention to electroglyph)
 - [Doc][pull3800]: Describe support for Telnet SSH in HAProxy documentation (holl0wstar)
@@ -77,6 +78,7 @@
 [issue3194]: https://github.com/evennia/evennia/issues/3194
 [issue2774]: https://github.com/evennia/evennia/issues/2774
 [issue3312]: https://github.com/evennia/evennia/issues/3312
+[issue3154]: https://github.com/evennia/evennia/issues/3154
 
 
 ## Evennia 5.0.1

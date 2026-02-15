@@ -691,6 +691,10 @@ class EvMenu:
                 logger.log_trace(_TRACE_PERSISTENT_SAVING)
                 persistent = False
 
+        # Make sure to not stack menu cmdsets across reload-restore cycles.
+        # On reload, ndb is cleared so we can't always close an old menu cleanly first.
+        self.caller.cmdset.remove(EvMenuCmdSet)
+
         # set up the menu command on the caller
         menu_cmdset = EvMenuCmdSet()
         menu_cmdset.mergetype = str(cmdset_mergetype).lower().capitalize() or "Replace"
