@@ -1,6 +1,8 @@
 # Changelog
 
-## Main branch
+## Evennia 6.0.0
+
+Feb 15, 2026
 
 - Feat (backwards incompatble): Drop Python 3.11 support (supported: Python 3.12, 3.13, 3.14 (req)). (Griatch)
 - Security: Django >=6.0.2 (<6.1), Django RestFramework 3.16 (Griatch)
