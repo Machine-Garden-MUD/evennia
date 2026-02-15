@@ -48,6 +48,7 @@
 - [Fix][issue3693]: Using `|/` in EvTable broke padding (Griatch)
 - [Fix][pull3864]: Correctly use cached dijkstra results for XYZGrid (jaborsh)
 - [Fix][pull3863]: `XYZGrid` performance improvement in teleporter search (jaborsh)
+- [Fix][pull3862]: `TraitHandler` typo/bug fixes  (jaborsh)
 - [Doc][pull3801]: Move Evennia doc build system to latest Sphinx/myST
   (PowershellNinja, also honorary mention to electroglyph)
 - [Doc][pull3800]: Describe support for Telnet SSH in HAProxy documentation (holl0wstar)
@@ -77,6 +78,7 @@
 [pull3733]: https://github.com/evennia/evennia/pull/3853
 [pull3864]: https://github.com/evennia/evennia/pull/3864
 [pull3863]: https://github.com/evennia/evennia/pull/3863
+[pull3862]: https://github.com/evennia/evennia/pull/3862
 [issue3858]: https://github.com/evennia/evennia/issues/3858
 [issue3813]: https://github.com/evennia/evennia/issues/3513
 [issue3649]: https://github.com/evennia/evennia/issues/3649
