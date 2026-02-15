@@ -507,6 +507,19 @@ class TestObjectPropertiesClass(DefaultObject):
         self.property_initialized = True
 
 
+class MixinAttributeProperty:
+    strength = AttributeProperty(default=0, category="stat")
+    agility = AttributeProperty(default=0, category="stat", autocreate=False)
+
+
+class MixinTagProperty:
+    mytag = TagProperty(category="mixin_tags")
+
+
+class TestObjectPropertiesMixinClass(MixinAttributeProperty, MixinTagProperty, DefaultObject):
+    pass
+
+
 class TestProperties(EvenniaTestCase):
     """
     Test Properties.
@@ -769,3 +782,21 @@ class TestProperties(EvenniaTestCase):
 
         obj1.delete()
         obj2.delete()
+
+    def test_mixin_properties_initialized_on_creation(self):
+        """
+        Test regression for #3155: properties on mixins should initialize on create.
+        """
+        obj = create.create_object(TestObjectPropertiesMixinClass, key="mixin_prop_obj")
+
+        self.assertEqual(obj.attributes.get("strength", category="stat"), 0)
+        self.assertEqual(obj.strength, 0)
+
+        # non-autocreate should still not exist in db until explicitly accessed
+        self.assertEqual(obj.attributes.get("agility", category="stat"), None)
+        self.assertEqual(obj.agility, 0)
+        self.assertEqual(obj.attributes.get("agility", category="stat"), None)
+
+        self.assertTrue(obj.tags.has("mytag", category="mixin_tags"))
+
+        obj.delete()
