@@ -34,6 +34,7 @@
   avoid inconsistencies with PostgreSQL databases (Griatch)
 - [Fix][issue3513]: Fixed issue where OnDemandHandler could traceback on an
   un-pickle-able object and cause an error at server shutdown (Griatch)
+- [Fix][issue3649]: The `:j` command in EvEditor would squash empty lines (Griatch)
 - [Doc][pull3801]: Move Evennia doc build system to latest Sphinx/myST
   (PowershellNinja, also honorary mention to electroglyph)
 - [Doc][pull3800]: Describe support for Telnet SSH in HAProxy documentation (holl0wstar)
@@ -63,6 +64,7 @@
 [pull3733]: https://github.com/evennia/evennia/pull/3853
 [issue3858]: https://github.com/evennia/evennia/issues/3858
 [issue3813]: https://github.com/evennia/evennia/issues/3513
+[issue3649]: https://github.com/evennia/evennia/issues/3649
 
 
 ## Evennia 5.0.1
