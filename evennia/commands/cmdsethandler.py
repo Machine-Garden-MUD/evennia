@@ -453,7 +453,6 @@ class CmdSetHandler(object):
         if "permanent" in kwargs:
             logger.log_dep("obj.cmdset.add() kwarg 'permanent' has changed name to 'persistent'.")
             persistent = kwargs["permanent"] if persistent is False else persistent
-
         if not (isinstance(cmdset, str) or utils.inherits_from(cmdset, CmdSet)):
             string = _("Only CmdSets can be added to the cmdsethandler!")
             raise Exception(string)
@@ -463,7 +462,10 @@ class CmdSetHandler(object):
         elif isinstance(cmdset, str):
             # this is (maybe) a python path. Try to import from cache.
             cmdset = self._import_cmdset(cmdset)
+
         if cmdset and cmdset.key != "_CMDSET_ERROR":
+            if any(cs.__class__ == cmdset.__class__ for cs in self.cmdset_stack):
+                return
             cmdset.persistent = persistent
             if persistent and cmdset.key != "_CMDSET_ERROR":
                 # store the path permanently
