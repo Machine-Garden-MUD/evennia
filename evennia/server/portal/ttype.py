@@ -112,11 +112,16 @@ class Ttype:
             # this is supposed to be the name of the client/terminal.
             # For clients not supporting the extended TTYPE
             # definition, subsequent calls will just repeat-return this.
-            try:
-                clientname = option.upper()
-            except AttributeError:
-                # malformed option (not a string)
-                clientname = "UNKNOWN"
+
+            # Mudlet sends name in CLIENT option which is handled in telnet_oob
+            if self.protocol().protocol_flags.get("CLIENTNAME"):
+                clientname = self.protocol().protocol_flags["CLIENTNAME"]
+            else:
+                try:
+                    clientname = option.upper()
+                except AttributeError:
+                    # malformed option (not a string)
+                    clientname = "UNKNOWN"
 
             # use name to identify support for xterm256. Many of these
             # only support after a certain version, but all support

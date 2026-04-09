@@ -375,6 +375,14 @@ class TelnetOOB:
             if remap in lower_case:
                 cmds["msdp_{}".format(remap)] = cmds.pop(lower_case[remap])
 
+        # store client identification fields on the session; overwrite "CLIENTNAME" if explicitly given client name
+        if "CLIENT" in cmds:
+            client = cmds.pop("CLIENT")[0]
+            version = cmds.pop("VERSION", [None])[0]
+            self.protocol().protocol_flags["CLIENTNAME"] = (
+                f"{client[0]} {version[0]}".strip() if version else client[0]
+            )
+
         # print("msdp data in:", cmds)  # DEBUG
         self.protocol().data_in(**cmds)
 
