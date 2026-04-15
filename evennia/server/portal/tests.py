@@ -237,6 +237,22 @@ class TestTelnet(TwistedTestCase):
         self.addCleanup(factory.sessionhandler.disconnect_all)
 
     @mock.patch("evennia.server.portal.portalsessionhandler.reactor", new=MagicMock())
+    def test_command_stacking_no_type_error(self):
+        self.transport.client = ["localhost"]
+        self.transport.setTcpKeepAlive = Mock()
+        d = self.proto.makeConnection(self.transport)
+        # Mudlet sends multiple commands in one packet when command stacking
+        data = b"wave\r\nsay hi\r\n"
+        try:
+            self.proto.dataReceived(data)
+        except TypeError:
+            self.fail("dataReceived raised TypeError on stacked commands")
+        # clean up to prevent Unclean reactor
+        self.proto.nop_keep_alive.stop()
+        self.proto._handshake_delay.cancel()
+        return d
+
+    @mock.patch("evennia.server.portal.portalsessionhandler.reactor", new=MagicMock())
     def test_mudlet_ttype(self):
         self.transport.client = ["localhost"]
         self.transport.setTcpKeepAlive = Mock()
@@ -365,7 +381,16 @@ class TestWebSocket(BaseEvenniaTest):
     @mock.patch("evennia.server.portal.portalsessionhandler.reactor", new=MagicMock())
     def test_data_out(self):
         self.proto.onOpen()
-        self.proto.sendLine = MagicMock()
-        msg = json.dumps(["logged_in", (), {}])
+        self.proto.sendEncoded = MagicMock()
         self.proto.sessionhandler.data_out(self.proto, text=[["Excepting Alice"], {}])
-        self.proto.sendLine.assert_called_with(json.dumps(["text", ["Excepting Alice"], {}]))
+        self.proto.sendEncoded.assert_called_once()
+        call_args = self.proto.sendEncoded.call_args
+        data = call_args[0][0]
+        # EvenniaV1Format encodes as JSON TEXT frame
+        parsed = json.loads(data)
+        self.assertEqual(parsed[0], "text")
+        self.assertEqual(parsed[1], ["Excepting Alice"])
+        # Verify frame is sent as TEXT (not BINARY) — v1 uses JSON TEXT frames
+        args, kwargs = call_args
+        is_binary = kwargs.get("is_binary", args[1] if len(args) > 1 else False)
+        self.assertFalse(is_binary)
