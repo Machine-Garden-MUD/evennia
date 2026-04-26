@@ -3109,7 +3109,7 @@ def ip_from_request(request, exclude=None) -> str:
         if all(not match_ip(addr, pattern) for pattern in exclude):
             return addr
 
-    logger.log_warn("ip_from_request: No valid IP address found in request. Using remote_addr.")
+    # logger.log_warn("ip_from_request: No valid IP address found in request. Using remote_addr.")
     return remote_addr
 
 
